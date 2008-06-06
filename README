@@ -1,3 +1,10 @@
 ==== merb-oauth
 
 Plugin to add OAuth Provider functionality. 
+
+Authors:
+
+- Eric Allam
+- Daniel Parker: created the original MerbRequest proxy (http://groups.google.com/group/oauth-ruby/browse_thread/thread/afc5b29291ebf2e3)
+
+MIT License.
