@@ -84,7 +84,14 @@ module OAuthMixin
    
   private
   
-  # Implement this for your own application using app-specific models
+  # Verifies the Request signature.
+  # Will attempt to retrieve the Consumer application by the consumer key
+  # Will attempt to retrieve either a RequestToken or AccessToken
+  # Make sure you define #find_application_by_key and #find_token (see above more more deets)
+  #
+  # Will throw an 401 response if the signature does not verify.  
+  #
+  # See http://oauth.net/core/1.0/#signing_process for information about OAuth request signing
   def verify_signature
     signature = OAuth::Signature.build(request) do |token, consumer_key|
       self.current_application = find_application_by_key(consumer_key)
