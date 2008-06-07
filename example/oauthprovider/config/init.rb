@@ -22,4 +22,6 @@ require File.expand_path(File.dirname(__FILE__)) + '/../../../init'
 
 Merb.push_path(:model, Merb.root / "models") # uses **/*.rb as path glob.
 
-use_orm :activerecord
+use_orm :datamapper
+
+dependency "dm-validations"

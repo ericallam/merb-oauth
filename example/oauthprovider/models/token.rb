@@ -1,17 +1,33 @@
-class Token < ActiveRecord::Base
-  belongs_to :application, :class_name => "ClientApplication", :foreign_key => "client_application_id"
+class Token
+  include DataMapper::Resource
   
-  validates_uniqueness_of :token
-  validates_presence_of :application, :token, :secret
+  property :id, Integer, :serial => true
+  property :type, Discriminator
+  property :client_application_id, Integer
+  property :token, String, :length => 50
+  property :secret, String, :length => 50
+  property :authorized_at, DateTime
+  property :invalidated_at, DateTime
+  property :created_at, DateTime
+  property :updated_at, DateTime
   
-  before_validation_on_create :generate_keys
+  belongs_to :client_application
+  
+  validates_is_unique :token
+  validates_present :client_application_id
+       
+  before :save do
+    credentials = client_application.server.generate_credentials
+    self.token = credentials.first
+    self.secret = credentials.last
+  end
   
   def invalidated?
     invalidated_at != nil
   end
   
   def invalidate!
-    update_attribute(:invalidated_at, Time.now)
+    update_attributes(:invalidated_at => Time.now)
   end
   
   def authorized?
@@ -27,11 +43,6 @@ class Token < ActiveRecord::Base
   def escape(value)
     CGI.escape(value.to_s).gsub("%7E", '~').gsub("+", "%20")
   end
-  
-  def generate_keys
-    @oauth_token = application.oauth_server.generate_credentials
-    self.token = @oauth_token.first
-    self.secret = @oauth_token[1]
-  end
+
   
 end
