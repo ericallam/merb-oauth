@@ -114,14 +114,21 @@ module OAuthMixin
   #
   # See http://oauth.net/core/1.0/#signing_process for information about OAuth request signing
   def verify_signature
-    signature = OAuth::Signature.build(request) do |token, consumer_key|
-      self.current_application = find_application_by_key(consumer_key)
-      self.current_token = find_token(token)
+    begin
+      signature = OAuth::Signature.build(request) do |token, consumer_key|
+        self.current_application = find_application_by_key(consumer_key)
+        self.current_token = find_token(token)
 
-      token_secret  = self.current_token ? self.current_token.secret : nil
-      app_secret    = self.current_application ? self.current_application.secret : nil
+        token_secret  = self.current_token ? self.current_token.secret : nil
+        app_secret    = self.current_application ? self.current_application.secret : nil
       
-      [token_secret, app_secret]
+        [token_secret, app_secret]
+      end
+    # Rescue requests made with unacceptable signature methods.  
+    # OAuth::Signature.available_methods holds a Hash of acceptable
+    # signature methods.  Provide a sane error message to the Consumer.
+    rescue OAuth::Signature::UnknownSignatureMethod => e
+      throw :halt, render("Unknown Signature Method: #{e.message}.  Accepts: #{OAuth::Signature.available_methods.keys.join(', ')}", :status => 401, :layout => false)
     end
     
     if signature.verify

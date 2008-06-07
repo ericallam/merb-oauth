@@ -87,6 +87,32 @@ describe OAuthMixin do
       end
     end
     
+    describe "signature method not known" do
+      
+      before(:each) do
+        OAuth::Signature.expects(:build).raises(OAuth::Signature::UnknownSignatureMethod, "HMAC-SHA1")
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is request"
+      end
+      
+      it "should render a decent error message" do
+        do_get
+        @controller.body.should == "Unknown Signature Method: HMAC-SHA1.  Accepts: hmac-sha1"
+      end
+    end
+    
     describe "correctly signed but a replay attack (request has already been performed)" do
       
       before(:each) do
@@ -191,6 +217,32 @@ describe OAuthMixin do
       end
     end
     
+    describe "signature method not known" do
+      
+      before(:each) do
+        OAuth::Signature.expects(:build).raises(OAuth::Signature::UnknownSignatureMethod, "HMAC-SHA1")
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is access"
+      end
+      
+      it "should render a decent error message" do
+        do_get
+        @controller.body.should == "Unknown Signature Method: HMAC-SHA1.  Accepts: hmac-sha1"
+      end
+    end
+    
     describe "correctly signed but a replay attack (request has already been performed)" do
       
       before(:each) do
@@ -288,6 +340,32 @@ describe OAuthMixin do
       it "should set the current_token to nil" do
         do_get
         @controller.current_token.should be_nil
+      end
+    end
+    
+    describe "signature method not known" do
+      
+      before(:each) do
+        OAuth::Signature.expects(:build).raises(OAuth::Signature::UnknownSignatureMethod, "HMAC-SHA1")
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is signed"
+      end
+      
+      it "should render a decent error message" do
+        do_get
+        @controller.body.should == "Unknown Signature Method: HMAC-SHA1.  Accepts: hmac-sha1"
       end
     end
     
