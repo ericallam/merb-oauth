@@ -81,6 +81,27 @@ module OAuthMixin
   def find_application_by_key(consumer_key)
     raise NotImplementedError
   end
+  
+  # You can implement this in your controller
+  # Used for 'Remembering' the request, such as creating a Nonce object
+  # that holds the request nonce and request timestamp.
+  #
+  # This is called in each before filter, only if the signature
+  # has been verified.  If you wanted to guard against Reply attacks
+  # You would define remember request to something like this: (Uses ActiveRecord)
+  #
+  #   def remember_request(signature)
+  #     if Nonce.find_by_nonce_and_timestamp(signature.request.nonce, signature.request.timestamp)
+  #       throw :halt, render("Reply attack.  That request has already been performed.", :status => 401, :layout => false)
+  #     else
+  #        Nonce.create(:nonce => signature.request.nonce, :timestamp => signature.request.timestamp)
+  #     end
+  #   end
+  #
+  # See http://oauth.net/core/1.0/#nonce for more information
+  def remember_request(signature)
+    # implement in your controller
+  end
    
   private
   
@@ -103,7 +124,9 @@ module OAuthMixin
       [token_secret, app_secret]
     end
     
-    if !signature.verify
+    if signature.verify
+      remember_request(signature)
+    else
       throw :halt, render("Invalid OAuth Request.  Signature could not be verified.", :status => 401, :layout => false)
     end
   end

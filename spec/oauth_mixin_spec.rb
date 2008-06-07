@@ -14,6 +14,10 @@ describe OAuthMixin do
     def access_token; render "this is access"; end
     def request_token; render "this is request"; end
     def index; render "this is index"; end
+    private
+    def remember_request(signature)
+      throw :halt, render("Replay attack", :status => 401, :layout => false) if request_already_happened?
+    end
   end
   
   def get(path, options={})
@@ -58,6 +62,7 @@ describe OAuthMixin do
       
       Posts.any_instance.stubs(:find_token).with('token').returns(@mock_request_token)
       Posts.any_instance.stubs(:find_application_by_key).with('consumer_key').returns(@mock_application)
+      Posts.any_instance.stubs(:request_already_happened?).returns(false)
     end
     
     describe "correctly signed" do
@@ -79,6 +84,27 @@ describe OAuthMixin do
       it "should set the current_token to nil" do
         do_get
         @controller.current_token.should == @mock_request_token
+      end
+    end
+    
+    describe "correctly signed but a replay attack (request has already been performed)" do
+      
+      before(:each) do
+        Posts.any_instance.expects(:request_already_happened?).returns(true)
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is request"
       end
     end
     
@@ -140,6 +166,7 @@ describe OAuthMixin do
       
       Posts.any_instance.stubs(:find_token).with('token').returns(@mock_access_token)
       Posts.any_instance.stubs(:find_application_by_key).with('consumer_key').returns(@mock_application)
+      Posts.any_instance.stubs(:request_already_happened?).returns(false)
     end
     
     describe "correctly signed" do
@@ -161,6 +188,27 @@ describe OAuthMixin do
       it "should set the current_token to nil" do
         do_get
         @controller.current_token.should == @mock_access_token
+      end
+    end
+    
+    describe "correctly signed but a replay attack (request has already been performed)" do
+      
+      before(:each) do
+        Posts.any_instance.expects(:request_already_happened?).returns(true)
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is access"
       end
     end
     
@@ -218,6 +266,7 @@ describe OAuthMixin do
       
       Posts.any_instance.stubs(:find_token).returns(nil)
       Posts.any_instance.stubs(:find_application_by_key).with('consumer_key').returns(@mock_application)
+      Posts.any_instance.stubs(:request_already_happened?).returns(false)
     end
     
     describe "correctly signed" do
@@ -239,6 +288,27 @@ describe OAuthMixin do
       it "should set the current_token to nil" do
         do_get
         @controller.current_token.should be_nil
+      end
+    end
+    
+    describe "correctly signed but a replay attack (request has already been performed)" do
+      
+      before(:each) do
+        Posts.any_instance.expects(:request_already_happened?).returns(true)
+      end
+      
+      def do_get
+        @controller = get @uri.path, "Authorization" => @request['Authorization'] 
+      end
+      
+      it "should return a 401 response" do
+        do_get
+        @controller.status.should == 401
+      end
+      
+      it "should halt before reaching the action" do
+        do_get
+        @controller.body.should_not == "this is signed"
       end
     end
     
