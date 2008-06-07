@@ -2,15 +2,15 @@ class RequestToken < Token
   
   def authorize!(options={})
     return false if authorized?
-    
-    self.update_attribute(:authorized_at, Time.now)
+    self.user = User.find(:email => options[:email])
+    self.update_attributes(:authorized_at => Time.now)
   end
   
   def exchange!
     return false unless authorized?
 
     RequestToken.transaction do
-      access_token = AccessToken.create(:application => application)
+      access_token = AccessToken.create(:client_application => client_application)
       invalidate!
       access_token
     end

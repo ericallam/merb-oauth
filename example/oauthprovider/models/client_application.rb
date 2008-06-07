@@ -3,6 +3,7 @@ class ClientApplication
   
   property :id, Integer, :serial => true
   property :name, String
+  property :user_id, Integer
   property :url, String
   property :support_url, String
   property :callback_url, String
@@ -12,6 +13,7 @@ class ClientApplication
   property :updated_at, DateTime
   
   has n, :tokens
+  belongs_to :user
   
   before :save do
     client = server.generate_consumer_credentials

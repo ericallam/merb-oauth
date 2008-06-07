@@ -3,6 +3,7 @@ class Token
   
   property :id, Integer, :serial => true
   property :type, Discriminator
+  property :user_id, Integer
   property :client_application_id, Integer
   property :token, String, :length => 50
   property :secret, String, :length => 50
@@ -12,6 +13,7 @@ class Token
   property :updated_at, DateTime
   
   belongs_to :client_application
+  has 1, :user
   
   validates_is_unique :token
   validates_present :client_application_id
