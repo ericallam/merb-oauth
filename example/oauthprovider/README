@@ -1,9 +1,0 @@
-OAuth Provider Merb example application
-==============
-
-This is an example of a Merb application that is set up as an OAuth provider using the merb-oauth plugin.
-
-Take a look inside application.rb for an example of how you could go about Issuing Request and Access Tokens.  Check out the documentation on each method in application.rb for an detailed explanation.
-
-
-  
