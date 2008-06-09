@@ -2,6 +2,10 @@
 
 Plugin to add OAuth Provider functionality. 
 
+==== Example app:
+
+http://github.com/rubymaverick/merb-oauth-example/tree/master
+
 Authors:
 
 - Eric Allam
