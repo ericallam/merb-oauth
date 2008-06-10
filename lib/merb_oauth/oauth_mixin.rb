@@ -2,6 +2,10 @@ require 'oauth/signature'
 
 module OAuthMixin
   
+  def oauth_logger
+    @oauth_logger ||= Merb.logger 
+  end
+  
   protected
   
   # ==== Before Filters
@@ -121,7 +125,9 @@ module OAuthMixin
 
         token_secret  = self.current_token ? self.current_token.secret : nil
         app_secret    = self.current_application ? self.current_application.secret : nil
-      
+        
+        self.oauth_logger.debug "Signature build: application-secret: #{app_secret}; token-secret: #{token_secret}"
+        
         [token_secret, app_secret]
       end
     # Rescue requests made with unacceptable signature methods.  
@@ -134,7 +140,9 @@ module OAuthMixin
     if signature.verify
       remember_request(signature)
     else
-      throw :halt, render("Invalid OAuth Request.  Signature could not be verified.", :status => 401, :layout => false)
+      self.oauth_logger.debug("Signature verify fail: Base: #{signature.signature_base_string}. Signature: #{signature.signature}")
+      
+      throw :halt, render("Invalid OAuth Request.  Signature could not be verified. Base: #{signature.signature_base_string}. Signature: #{signature.signature}", :status => 401, :layout => false)
     end
   end
   

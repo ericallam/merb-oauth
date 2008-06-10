@@ -78,12 +78,12 @@ describe OAuthMixin do
       
       it "should set the current_application" do
         do_get
-        @controller.current_application.should == @mock_application
+        @controller.send(:current_application).should == @mock_application
       end
       
       it "should set the current_token to nil" do
         do_get
-        @controller.current_token.should == @mock_request_token
+        @controller.send(:current_token).should == @mock_request_token
       end
     end
     
@@ -208,12 +208,12 @@ describe OAuthMixin do
       
       it "should set the current_application" do
         do_get
-        @controller.current_application.should == @mock_application
+        @controller.send(:current_application).should == @mock_application
       end
       
       it "should set the current_token to nil" do
         do_get
-        @controller.current_token.should == @mock_access_token
+        @controller.send(:current_token).should == @mock_access_token
       end
     end
     
@@ -334,12 +334,12 @@ describe OAuthMixin do
       
       it "should set the current_application" do
         do_get
-        @controller.current_application.should == @mock_application
+        @controller.send(:current_application).should == @mock_application
       end
       
       it "should set the current_token to nil" do
         do_get
-        @controller.current_token.should be_nil
+        @controller.send(:current_token).should be_nil
       end
     end
     
